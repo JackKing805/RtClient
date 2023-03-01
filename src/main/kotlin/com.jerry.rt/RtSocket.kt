@@ -1,7 +1,10 @@
 package com.jerry.rt
 
 import com.jerry.rt.i.StateListener
+import com.jerry.rt.input.BasicInfoHandler
+import kotlinx.coroutines.*
 import java.net.Socket
+import java.util.concurrent.atomic.AtomicBoolean
 
 /**
  * @className: RtSocket
@@ -9,16 +12,29 @@ import java.net.Socket
  * @date: 2023/2/28:20:04
  **/
 class RtSocket(private val host:String,private val port:Int) {
+    private val scope = CoroutineScope(Dispatchers.IO + SupervisorJob() + CoroutineExceptionHandler { coroutineContext, throwable ->  })
     private val socket = Socket(host,port)
-    private val inputStream = socket.getInputStream()
-    private val outputStream = socket.getOutputStream()
-
+    private val basicInfoHandler = BasicInfoHandler(socket)
+    private var isAlive = AtomicBoolean(false)
 
     fun connect(){
-        socket.keepAlive = true
+
+        startHeartbeat()
     }
 
-    fun getInputStream() = inputStream
+    private fun startHeartbeat(){
+        scope.launch {
+            isAlive.set(true)
+            while (isAlive.get()){
 
-    fun getOutputStream() = outputStream
+            }
+        }
+    }
+
+
+
+
+    fun getInputStream() = basicInfoHandler.inputStream()
+
+    fun getOutputStream() = basicInfoHandler.outputStream()
 }
