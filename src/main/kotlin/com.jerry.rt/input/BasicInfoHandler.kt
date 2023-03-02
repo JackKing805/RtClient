@@ -1,6 +1,7 @@
 package com.jerry.rt.input
 
 import com.jerry.rt.input.model.BasicHeader
+import com.jerry.rt.model.MessageRtProtocol
 import java.io.IOException
 import java.io.InputStream
 import java.io.OutputStream
@@ -186,7 +187,7 @@ class BasicInfoHandler(socket: Socket) {
 
     fun headers() = hdrs!!
 
-    fun getMessageRtProtocol() {
+    fun getMessageRtProtocol() :MessageRtProtocol{
         process()
 
 
@@ -195,11 +196,11 @@ class BasicInfoHandler(socket: Socket) {
 
 
         val split = requestLine.split(" ")
-        val method = split[0]
-        val url = split[1]
-        val version = split[2]
+        val version = split[0]
+        val code = split[0].toInt()
+        val msg = split[1]
 
-
+        return MessageRtProtocol(code,msg,version,headers.getHeaders())
     }
 }
 
