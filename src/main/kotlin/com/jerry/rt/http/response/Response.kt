@@ -39,5 +39,4 @@ data class Response(
         }
         return null
     }
-
 }

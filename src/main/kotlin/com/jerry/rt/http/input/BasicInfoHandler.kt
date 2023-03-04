@@ -208,8 +208,8 @@ class BasicInfoHandler(private val socket: Socket) {
 
         val split = requestLine.split(" ")
         val version = split[0]
-        val code = split[0].toInt()
-        val msg = split[1]
+        val code = split[1].toInt()
+        val msg = split[2]
 
         return MessageRtProtocol(code,msg,version,headers.getHeaders())
     }

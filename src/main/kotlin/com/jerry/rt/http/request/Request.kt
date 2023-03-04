@@ -4,6 +4,7 @@ import com.jerry.rt.core.http.protocol.*
 import com.jerry.rt.http.request.impl.ByteRequestWriter
 import com.jerry.rt.utils.RtUtils
 import java.io.*
+import java.nio.charset.Charset
 import java.util.*
 
 /**
@@ -21,6 +22,8 @@ class Request(
     private val header = mutableMapOf<String, String>()
 
     private var url = "/"
+
+    private var charset = Charsets.UTF_8
 
     init {
         reset()
@@ -54,8 +57,23 @@ class Request(
         })
     }
 
+    fun setCharset(charset: Charset) {
+        this.charset = charset
+    }
+
+    fun getCharset() = charset
+
     fun setContentType(contentType: String) {
-        header[RtHeader.CONTENT_TYPE.content] = contentType
+        val result = if (contentType.startsWith("text")) {
+            if (contentType.contains(";")) {
+                contentType
+            } else {
+                contentType + ";" + charset.name()
+            }
+        } else {
+            contentType
+        }
+        header[RtHeader.CONTENT_TYPE.content] = result
     }
 
 
@@ -79,6 +97,20 @@ class Request(
         send(start = {
             setContentType(contentType)
             setContentLength(length)
+        },{
+            byteResponseWriter.writeBody(body)
+        }) {
+
+        }
+    }
+
+    @Throws(IOException::class)
+    fun write(body: ByteArray) {
+        if (header[RtHeader.CONTENT_TYPE.content] ==null){
+            throw NullPointerException("please provider contentType")
+        }
+        send(start = {
+            setContentLength(body.size)
         },{
             byteResponseWriter.writeBody(body)
         }) {

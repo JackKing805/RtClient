@@ -1,6 +1,7 @@
 package com.jerry.rt.http
 
 import com.jerry.rt.core.http.protocol.RtContentType
+import com.jerry.rt.core.http.protocol.RtMimeType
 import com.jerry.rt.http.input.BasicInfoHandler
 import com.jerry.rt.http.request.Request
 import com.jerry.rt.http.response.Response
@@ -26,10 +27,17 @@ class RtSocket(host:String, port:Int) {
 
     fun isAlive() = isAlive.get()
 
-    fun connect(){
-        startHeartbeat()
-        waitMessage{
-            println("res:${it.getBody()}")
+    fun connect(onConnect:(()->Unit)?=null,onMessage: ((Response) -> Unit)?=null, onClose:(()->Unit)?=null){
+        scope.launch {
+            startHeartbeat()
+            onConnect?.invoke()
+            waitMessage{
+                onMessage?.invoke(it)
+            }
+            while (isAlive()){
+                delay(500)
+            }
+            onClose?.invoke()
         }
     }
 
@@ -71,5 +79,18 @@ class RtSocket(host:String, port:Int) {
             basicInfoHandler.close()
             isAlive.set(false)
         }
+    }
+
+    fun getRequest() = if (isAlive()) request else null
+
+    fun sendMessage(content: String){
+        request.setContentType(RtContentType.TEXT_PLAIN.content)
+        request.write(content)
+    }
+
+    fun sendMessage(byteArray: ByteArray){
+        request.setContentType(RtMimeType.STREAM.mimeType)
+        request.write(byteArray)
+
     }
 }

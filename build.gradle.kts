@@ -3,10 +3,12 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 plugins {
     kotlin("jvm") version "1.8.0"
     application
+    `maven-publish`
 }
 
+val vv = "0.0.1"
 group = "com.jerry"
-version = "1.0-SNAPSHOT"
+version = vv
 
 repositories {
     mavenCentral()
@@ -17,7 +19,7 @@ dependencies {
 
     //协程
     compileOnly("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4")
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4")//todo remove
+//    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4")//todo remove
 }
 
 
@@ -31,4 +33,15 @@ tasks.withType<KotlinCompile> {
 
 application {
     mainClass.set("MainKt")
+}
+
+publishing{
+    publications{
+        create("maven_public",MavenPublication::class){
+            groupId = "com.jerry"
+            artifactId = "RtCore"
+            version = vv
+            from(components.getByName("java"))
+        }
+    }
 }
