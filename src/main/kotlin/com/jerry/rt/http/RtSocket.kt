@@ -1,9 +1,12 @@
-package com.jerry.rt
+package com.jerry.rt.http
 
+import com.jerry.rt.core.http.protocol.RtContentType
+import com.jerry.rt.http.input.BasicInfoHandler
+import com.jerry.rt.http.request.Request
 import com.jerry.rt.http.response.Response
-import com.jerry.rt.input.BasicInfoHandler
 import com.jerry.rt.http.response.SocketData
 import kotlinx.coroutines.*
+import java.lang.Thread.sleep
 import java.net.Socket
 import java.net.SocketException
 import java.net.SocketTimeoutException
@@ -14,26 +17,28 @@ import java.util.concurrent.atomic.AtomicBoolean
  * @author: Jerry
  * @date: 2023/2/28:20:04
  **/
-class RtSocket(private val host:String,private val port:Int) {
+class RtSocket(host:String, port:Int) {
     private val scope = CoroutineScope(Dispatchers.IO + SupervisorJob() + CoroutineExceptionHandler { coroutineContext, throwable ->  })
-    private val socket = Socket(host,port)
-    private val basicInfoHandler = BasicInfoHandler(socket)
     private var isAlive = AtomicBoolean(false)
+    private val basicInfoHandler = BasicInfoHandler(Socket(host,port))
+    private val request = Request(basicInfoHandler.outputStream())
+
+
+    fun isAlive() = isAlive.get()
 
     fun connect(){
         startHeartbeat()
         waitMessage{
-
+            println("res:${it.getBody()}")
         }
     }
 
     private fun waitMessage(onMessage:(Response)->Unit){
         scope.launch {
-            val basicInfo = BasicInfoHandler(socket)
             while (isAlive.get()){
                 try {
-                    val messageRtProtocol = basicInfo.getMessageRtProtocol()
-                    val socketData = SocketData(messageRtProtocol,basicInfo.inputStream(),basicInfo.outputStream())
+                    val messageRtProtocol = basicInfoHandler.getMessageRtProtocol()
+                    val socketData = SocketData(messageRtProtocol,basicInfoHandler.inputStream())
                     onMessage(Response(socketData))
                     socketData.skipData()
                 }catch (e: SocketException){
@@ -54,15 +59,17 @@ class RtSocket(private val host:String,private val port:Int) {
         scope.launch {
             isAlive.set(true)
             while (isAlive.get()){
-
+                request.setContentType(RtContentType.RT_HEARTBEAT.content)
+                try {
+                    request.sendHeader()
+                }catch (e:Exception){
+                    e.printStackTrace()
+                    break
+                }
+                delay(3000)
             }
+            basicInfoHandler.close()
+            isAlive.set(false)
         }
     }
-
-
-
-
-    fun getInputStream() = basicInfoHandler.inputStream()
-
-    fun getOutputStream() = basicInfoHandler.outputStream()
 }

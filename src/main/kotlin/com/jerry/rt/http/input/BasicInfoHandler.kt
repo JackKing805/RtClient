@@ -1,10 +1,11 @@
-package com.jerry.rt.input
+package com.jerry.rt.http.input
 
-import com.jerry.rt.input.model.BasicHeader
+import com.jerry.rt.http.input.model.BasicHeader
 import com.jerry.rt.model.MessageRtProtocol
 import java.io.IOException
 import java.io.InputStream
 import java.io.OutputStream
+import java.lang.Exception
 import java.net.Socket
 
 /**
@@ -12,7 +13,7 @@ import java.net.Socket
  * @author: Jerry
  * @date: 2023/2/15:19:39
  **/
-class BasicInfoHandler(socket: Socket) {
+class BasicInfoHandler(private val socket: Socket) {
     private var startLine: String? = null
     private var `is`: InputStream
     private var os: OutputStream
@@ -23,8 +24,18 @@ class BasicInfoHandler(socket: Socket) {
 
 
     init {
+        socket.keepAlive = true
         `is` = socket.getInputStream()
         os = socket.getOutputStream()
+    }
+
+    fun close(){
+        try {
+            socket.shutdownInput()
+            socket.shutdownOutput()
+            socket.close()
+        }catch (e:Exception){
+        }
     }
 
 
@@ -193,7 +204,7 @@ class BasicInfoHandler(socket: Socket) {
 
         val headers = headers()
         val requestLine = requestLine()
-
+        println("requ:$requestLine")
 
         val split = requestLine.split(" ")
         val version = split[0]

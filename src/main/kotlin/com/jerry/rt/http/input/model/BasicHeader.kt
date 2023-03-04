@@ -1,4 +1,4 @@
-package com.jerry.rt.input.model
+package com.jerry.rt.http.input.model
 
 import java.util.function.Consumer
 

@@ -12,23 +12,29 @@ import java.util.*
  * @author: Jerry
  * @date: 2023/1/6:19:47
  **/
+//todo contentType设置charset
 class Request(
     private val output: OutputStream,
 ){
     private val byteResponseWriter = ByteRequestWriter(output)
 
     private val header = mutableMapOf<String, String>()
-    private var statusCode = 200
 
     private var url = "/"
-
 
     init {
         reset()
     }
 
 
+    fun setUrl(url:String){
+        if (url.isEmpty()){
+            throw IllegalArgumentException("not support empty url")
+        }
+        this.url = url
+    }
 
+    fun getUrl() = url
 
     fun setHeader(key: String, value: String) {
         header[key] = value
@@ -39,7 +45,6 @@ class Request(
     }
 
     fun getHeaders() = header
-
 
 
     fun setHeaders(headers: MutableMap<String, String>) {
@@ -53,16 +58,12 @@ class Request(
         header[RtHeader.CONTENT_TYPE.content] = contentType
     }
 
-    fun setResponseStatusCode(code: Int) {
-        statusCode = code
-    }
-
-    fun getResponseStatusCode() = statusCode
 
     fun setContentLength(length: Int) {
         header[RtHeader.CONTENT_LENGTH.content] = length.toString()
     }
 
+    @Throws(Exception::class)
     fun sendHeader() {
         write("")
     }
@@ -88,8 +89,7 @@ class Request(
     fun reset(){
         header.clear()
         setHeader(RtHeader.DATE.content, RtUtils.dateToFormat(Date(),"EEE, dd MMM yyyy HH:mm:ss 'GMT'"))
-        setResponseStatusCode(200)
-
+        url = "/"
     }
 
     @Throws(IOException::class)
@@ -118,6 +118,7 @@ class Request(
      * 发送，重要方法
      */
     @Synchronized
+    @Throws(Exception::class)
     private fun send(start:()->Unit, body:(ByteRequestWriter)->Unit, complete:()->Unit){
         try {
             start()
@@ -129,7 +130,7 @@ class Request(
             byteResponseWriter.endWrite()
             reset()
         }catch (e:Exception){
-            e.printStackTrace()
+            throw e
         }finally {
             complete()
         }

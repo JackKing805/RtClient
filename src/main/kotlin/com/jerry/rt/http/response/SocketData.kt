@@ -13,9 +13,8 @@ import java.io.OutputStream
 class SocketData(
     private val messageRtProtocol: MessageRtProtocol,
     inputStream: InputStream,
-    outputStream: OutputStream
 ) : DataReadListener {
-    private val socketBody = SocketBody(messageRtProtocol.getContentLength(),inputStream,outputStream)
+    private val socketBody = SocketBody(messageRtProtocol.getContentLength(),inputStream)
 
     fun getProtocol() = messageRtProtocol
 

@@ -14,7 +14,7 @@ import java.io.OutputStream
  * @author: Jerry
  * @date: 2023/2/12:14:52
  **/
-class SocketBody(private val maxSize:Long,private val inputStream: InputStream,private val outputStream: OutputStream):DataReadListener {
+class SocketBody(private val maxSize:Long,private val inputStream: InputStream):DataReadListener {
     private var readSize = 0L
 
     @Throws(exceptionClasses = [NoLengthReadException::class, LimitLengthException::class])
@@ -55,6 +55,4 @@ class SocketBody(private val maxSize:Long,private val inputStream: InputStream,p
     }
 
     fun getInputStream() = inputStream
-
-    fun getOutputStream() = outputStream
 }
