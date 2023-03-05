@@ -121,7 +121,6 @@ class Request(
     fun reset(){
         header.clear()
         setHeader(RtHeader.DATE.content, RtUtils.dateToFormat(Date(),"EEE, dd MMM yyyy HH:mm:ss 'GMT'"))
-        url = "/"
     }
 
     @Throws(IOException::class)

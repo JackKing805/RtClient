@@ -27,7 +27,8 @@ class RtSocket(host:String, port:Int) {
 
     fun isAlive() = isAlive.get()
 
-    fun connect(onConnect:(()->Unit)?=null,onMessage: ((Response) -> Unit)?=null, onClose:(()->Unit)?=null){
+    fun connect(url:String,onConnect:(()->Unit)?=null,onMessage: ((Response) -> Unit)?=null, onClose:(()->Unit)?=null){
+        request.setUrl(url)
         scope.launch {
             startHeartbeat()
             onConnect?.invoke()
@@ -65,8 +66,13 @@ class RtSocket(host:String, port:Int) {
 
     private fun startHeartbeat(){
         scope.launch {
+            var isFirst = true
             isAlive.set(true)
             while (isAlive.get()){
+                if (isFirst){
+                    isFirst = false
+                    delay(1000)
+                }
                 request.setContentType(RtContentType.RT_HEARTBEAT.content)
                 try {
                     request.sendHeader()

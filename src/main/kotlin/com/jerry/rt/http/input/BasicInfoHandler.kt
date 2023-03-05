@@ -204,7 +204,6 @@ class BasicInfoHandler(private val socket: Socket) {
 
         val headers = headers()
         val requestLine = requestLine()
-        println("requ:$requestLine")
 
         val split = requestLine.split(" ")
         val version = split[0]
