@@ -80,7 +80,7 @@ class RtSocket(host:String, port:Int) {
                     e.printStackTrace()
                     break
                 }
-                delay(3000)
+                delay(5000)
             }
             basicInfoHandler.close()
             isAlive.set(false)
