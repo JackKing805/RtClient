@@ -1,8 +1,9 @@
 import com.jerry.rt.RtClient
 import java.lang.Thread.sleep
+import java.util.UUID
 
 fun main(args: Array<String>) {
-    val rtClient = RtClient.connect("localhost",8080)
+    val rtClient = RtClient.connect("192.168.101.4",8080)
     var id = 0
     rtClient.connect("rt/aa",
         {
@@ -12,7 +13,7 @@ fun main(args: Array<String>) {
         {
             val body = it.getBody()?:""
             println("msg:${body}")
-            rtClient.sendMessage(body)
+            rtClient.sendMessage(UUID.randomUUID().toString() + UUID.randomUUID().toString() + UUID.randomUUID().toString() + UUID.randomUUID().toString())
         },{
             println("close")
         }
