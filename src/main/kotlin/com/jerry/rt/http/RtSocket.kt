@@ -18,18 +18,22 @@ import java.util.concurrent.atomic.AtomicBoolean
  * @author: Jerry
  * @date: 2023/2/28:20:04
  **/
-class RtSocket(host:String, port:Int) {
-    private val scope = CoroutineScope(Dispatchers.IO + SupervisorJob() + CoroutineExceptionHandler { coroutineContext, throwable ->  })
+class RtSocket(private val host:String,private val port:Int) {
+    private val scope = CoroutineScope(Dispatchers.IO + SupervisorJob() + CoroutineExceptionHandler { coroutineContext, throwable ->
+        throwable.printStackTrace()
+    })
     private var isAlive = AtomicBoolean(false)
-    private val basicInfoHandler = BasicInfoHandler(Socket(host,port))
-    private val request = Request(basicInfoHandler.outputStream())
-
+    private lateinit var basicInfoHandler:BasicInfoHandler
+    private lateinit var request:Request
 
     fun isAlive() = isAlive.get()
 
     fun connect(url:String,onConnect:(()->Unit)?=null,onMessage: ((Response) -> Unit)?=null, onClose:(()->Unit)?=null){
         request.setUrl(url)
-        scope.launch {
+        scope.launch(Dispatchers.IO) {
+            basicInfoHandler = BasicInfoHandler(Socket(host,port))
+            request = Request(basicInfoHandler.outputStream())
+
             startHeartbeat()
             onConnect?.invoke()
             waitMessage{
@@ -43,7 +47,7 @@ class RtSocket(host:String, port:Int) {
     }
 
     private fun waitMessage(onMessage:(Response)->Unit){
-        scope.launch {
+        scope.launch(Dispatchers.IO) {
             while (isAlive.get()){
                 try {
                     val messageRtProtocol = basicInfoHandler.getMessageRtProtocol()
