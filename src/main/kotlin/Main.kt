@@ -5,7 +5,7 @@ import java.util.UUID
 fun main(args: Array<String>) {
     val rtClient = RtClient.connect("192.168.101.4",8080)
     var id = 0
-    rtClient.connect("rt/aa",
+    rtClient.connect("rt/server",
         {
             println("connect")
             rtClient.sendMessage("hallo")
