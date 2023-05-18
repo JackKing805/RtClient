@@ -13,7 +13,6 @@ import java.util.*
  * @author: Jerry
  * @date: 2023/1/6:19:47
  **/
-//todo contentType设置charset
 class Request(
     private val output: OutputStream,
 ){

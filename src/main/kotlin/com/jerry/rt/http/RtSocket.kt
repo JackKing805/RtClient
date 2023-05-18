@@ -28,11 +28,12 @@ class RtSocket(private val host:String,private val port:Int) {
 
     fun isAlive() = isAlive.get()
 
-    fun connect(url:String,onConnect:(()->Unit)?=null,onMessage: ((Response) -> Unit)?=null, onClose:(()->Unit)?=null){
+    fun connect(url:String, initHeader:Map<String,String> = mapOf(), onConnect:(()->Unit)?=null, onMessage: ((Response) -> Unit)?=null, onClose:(()->Unit)?=null){
         scope.launch(Dispatchers.IO) {
             basicInfoHandler = BasicInfoHandler(Socket(host,port))
             request = Request(basicInfoHandler.outputStream())
             request.setUrl(url)
+            request.setHeaders(initHeader.toMutableMap())
 
             startHeartbeat()
             onConnect?.invoke()
