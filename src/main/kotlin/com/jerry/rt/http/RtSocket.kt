@@ -47,6 +47,18 @@ class RtSocket(private val host:String,private val port:Int) {
         }
     }
 
+    fun close(){
+        scope.launch(Dispatchers.IO) {
+            try {
+                basicInfoHandler.close()
+                isAlive.set(false)
+            }catch (e:Exception){
+                e.printStackTrace()
+            }
+        }
+
+    }
+
     private fun waitMessage(onMessage:(Response)->Unit){
         scope.launch(Dispatchers.IO) {
             while (isAlive.get()){
