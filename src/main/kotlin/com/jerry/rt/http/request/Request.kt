@@ -22,7 +22,7 @@ class Request(
 
     private var url = "/"
 
-    private var charset = Charsets.UTF_8
+    private var charset:Charset? = null
 
     init {
         reset()
@@ -67,7 +67,11 @@ class Request(
             if (contentType.contains(";")) {
                 contentType
             } else {
-                contentType + "; charset=" + charset.name()
+                if (charset!=null){
+                    contentType + "; charset=" + charset!!.name()
+                }else{
+                    contentType
+                }
             }
         } else {
             contentType
@@ -123,19 +127,16 @@ class Request(
     }
 
     @Throws(IOException::class)
-    fun write(body: String, contentType: String, length: Int = body.length) {
-        write(body.toByteArray(), contentType, length)
-    }
-
-    @Throws(IOException::class)
     fun write(body: String, contentType: String) {
-        write(body.toByteArray(), contentType, body.length)
+        val result = if (charset!=null) body.toByteArray(charset!!) else body.toByteArray()
+        write(result, contentType, result.size)
     }
 
     @Throws(IOException::class)
     fun write(body: String) {
         val contentType = header[RtHeader.CONTENT_TYPE.content]?:throw NullPointerException("please set Content-Type")
-        write(body.toByteArray(), contentType, body.length)
+        val result = if (charset!=null) body.toByteArray(charset!!) else body.toByteArray()
+        write(result, contentType, result.size)
     }
 
 
