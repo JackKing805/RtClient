@@ -123,6 +123,7 @@ class Request(
 
     fun reset(){
         header.clear()
+        charset = null
         setHeader(RtHeader.DATE.content, RtUtils.dateToFormat(Date(),"EEE, dd MMM yyyy HH:mm:ss 'GMT'"))
     }
 
